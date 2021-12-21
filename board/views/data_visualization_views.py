@@ -1,4 +1,4 @@
-from ru.views import *
+from board.views import *
 
 
 def logic_test_data(data, RSW_Monitor_node):

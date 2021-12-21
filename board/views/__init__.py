@@ -18,20 +18,23 @@ from sklearn.cluster import KMeans
 sys.setrecursionlimit(1000000)
 
 cf = configparser.ConfigParser()
-cf.read('ru/config/ru.cfg')
+cf.read('board/config/board.cfg')
 
 # get Elasticsearch ins
 profile = os.environ.get('env', 'develop')
 if profile == 'product':
     server_address = '10.166.152.49'
+    xml_path = "/home/lteuser/App/data_visualization_back/13037.xml"
+    desc_path = "/home/lteuser/App/data_visualization_back/6419_B42_R2B_Final_Version.xlsx"
 else:
     server_address = 'localhost'
+    xml_path = "D:\\projects\\test\\13037.xml"
+    desc_path = "D:\\projects\\test\\6419_B42_R2B_Final_Version.xlsx"
 
-# init xml data with 6626
-tree = ET.parse('D:\\projects\\test\\13037.xml')
+# init xml data
+tree = ET.parse(xml_path)
+desc = pd.read_excel(desc_path)
 root = tree.getroot()
-desc = pd.read_excel("D:\\projects\\test\\6419_B42_R2B_Final_Version.xlsx")
-
 packages = {}
 
 for Package in root.iter('Package'):
