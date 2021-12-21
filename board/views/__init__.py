@@ -24,8 +24,8 @@ cf.read('board/config/board.cfg')
 profile = os.environ.get('env', 'develop')
 if profile == 'product':
     server_address = '10.166.152.49'
-    xml_path = "/home/lteuser/App/data_visualization_back/13037.xml"
-    desc_path = "/home/lteuser/App/data_visualization_back/6419_B42_R2B_Final_Version.xlsx"
+    xml_path = "/data_visualization/13037.xml"
+    desc_path = "/data_visualization/6419_B42_R2B_Final_Version.xlsx"
 else:
     server_address = 'localhost'
     xml_path = "D:\\projects\\test\\13037.xml"
