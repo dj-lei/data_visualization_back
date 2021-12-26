@@ -142,21 +142,24 @@ def filter_by_nodes(levels, rels, filter_nodes, filter_rels):
     ret_levels = []
     ret_rels = []
     tmp = []
-    for item in levels:
-        for word in filter_nodes:
-            if word.lower() in item['Desc'].lower():
-                ret_levels.append(item)
-                tmp.append(item['Node'])
 
-    for item in rels:
-        if (item['source'] in tmp) & (item['target'] in tmp):
-            temp = []
-            for rel in item['type'].split(' '):
-                for k in filter_rels:
-                    if k.lower() in rel.lower():
-                        temp.append(rel)
-            item['type'] = ' '.join(temp)
-            ret_rels.append(item)
+    if filter_nodes != '':
+        for item in levels:
+            for word in filter_nodes:
+                if word.lower() in item['Desc'].lower():
+                    ret_levels.append(item)
+                    tmp.append(item['Node'])
+
+    if filter_rels != '':
+        for item in rels:
+            if (item['source'] in tmp) & (item['target'] in tmp):
+                temp = []
+                for rel in item['type'].split(' '):
+                    for k in filter_rels:
+                        if k.lower() in rel.lower():
+                            temp.append(rel)
+                item['type'] = ' '.join(temp)
+                ret_rels.append(item)
     return ret_levels, ret_rels
 
 
@@ -220,6 +223,26 @@ def get(request):
             elif operate == cf['DATA_VISUALIZATION']['GET_PHYSICS_CHART_DATA']:
                 layer_ref = request.GET.get(cf['DATA_VISUALIZATION']['LAYER_REF'])
                 return JsonResponse({'content': physical_topology(components, components_desc, layer_ref)})
+            elif operate == cf['DATA_VISUALIZATION']['GET_BOARD_TEMPERATURE']:
+                layer_ref = request.GET.get(cf['DATA_VISUALIZATION']['LAYER_REF'])
+
+                map_board = pd.read_excel("D:\\projects\\test\\6419map.xlsx")
+                temperature = {}
+                with open('D:\\projects\\test\\6419print.txt', 'r') as f:
+                    for line in f.readlines():
+                        tmp = re.sub(' +', ' ', line.replace('\n', '')).split(' : ')
+                        temperature[tmp[0]] = {'temperature': tmp[1]}
+
+                res = []
+                for record in json.loads(map_board.to_json(orient='records')):
+                    if layer_ref == components[record['Comonent_RefDes']]['layerRef']:
+                        record['Command_Printout'] = record['Command_Printout'].strip()
+                        record['Top_Bottom'] = components[record['Comonent_RefDes']]['layerRef']
+                        record['Location'] = components[record['Comonent_RefDes']]['Location']
+                        record['temperature'] = temperature[record['Command_Printout']]['temperature']
+                        res.append(record)
+
+                return JsonResponse({'content': res})
             elif operate == cf['DATA_VISUALIZATION']['GET_ECHART_TEST_DATA']:
                 return JsonResponse({'content': {'radon rxpwr': random.randint(0, 10), 'radon ipwr': random.randint(5, 20), 'radon wpwr': random.randint(10, 15)}})
         return HttpResponse(404)
