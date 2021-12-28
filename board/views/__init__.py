@@ -5,6 +5,7 @@ import sys
 import json
 import time
 import random
+import paramiko
 import configparser
 import traceback
 import pandas as pd
@@ -26,10 +27,23 @@ if profile == 'product':
     server_address = '10.166.152.49'
     xml_path = "/data_visualization/13037.xml"
     desc_path = "/data_visualization/6419_B42_R2B_Final_Version.xlsx"
+    map_board = pd.read_excel("/data_visualization/6419map.xlsx")
 else:
     server_address = 'localhost'
-    xml_path = "D:\\projects\\test\\13037.xml"
-    desc_path = "D:\\projects\\test\\6419_B42_R2B_Final_Version.xlsx"
+    xml_path = "C:\\projects\\test\\13037.xml"
+    desc_path = "C:\\projects\\test\\6419_B42_R2B_Final_Version.xlsx"
+    map_board = pd.read_excel("C:\\projects\\test\\6419map.xlsx")
+
+# moshell client
+trans = paramiko.Transport('10.163.201.14', 22)
+trans.start_client()
+trans.auth_password(username='lteuser', password='ltepass')
+channel = trans.open_session(timeout=30)
+channel.get_pty()
+channel.invoke_shell()
+
+moshell_cmd = 'moshell -v username=expert,password=expert 10.163.156.176 \n'
+channel.send(moshell_cmd)
 
 # init xml data
 tree = ET.parse(xml_path)

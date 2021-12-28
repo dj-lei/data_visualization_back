@@ -226,12 +226,23 @@ def get(request):
             elif operate == cf['DATA_VISUALIZATION']['GET_BOARD_TEMPERATURE']:
                 layer_ref = request.GET.get(cf['DATA_VISUALIZATION']['LAYER_REF'])
 
-                map_board = pd.read_excel("D:\\projects\\test\\6419map.xlsx")
+                read_temperature_cmd = 'lhsh fru_2048 ts r \n'
+                channel.send(read_temperature_cmd)
+                time.sleep(2)
+
+                ret = channel.recv(65535).decode('utf-8')
+                ret_tmp = []
+                flag = False
+                for line in ret.split('\r\n'):
+                    if flag & (line[-2:] == ' C'):
+                        ret_tmp.append(line)
+                    if '/'+read_temperature_cmd.strip() in line:
+                        flag = True
+                
                 temperature = {}
-                with open('D:\\projects\\test\\6419print.txt', 'r') as f:
-                    for line in f.readlines():
-                        tmp = re.sub(' +', ' ', line.replace('\n', '')).split(' : ')
-                        temperature[tmp[0]] = {'temperature': tmp[1]}
+                for line in ret_tmp:
+                    tmp = re.sub(' +', ' ', line.replace('\n', '')).split(' : ')
+                    temperature[tmp[0]] = {'temperature': tmp[1]}
 
                 res = []
                 for record in json.loads(map_board.to_json(orient='records')):
